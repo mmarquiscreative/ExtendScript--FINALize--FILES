@@ -1,5 +1,13 @@
 #target indesign
 //color swatches
+// Switch tool if page-tool is selected
+var myTool = app.toolBoxTools;
+
+if (myTool.currentTool === UITools.PAGE_TOOL) {
+    myTool.currentTool = UITools.SELECTION_TOOL;
+};
+
+// Swatches
 app.menuActions.item("$ID/Add All Unnamed Colors").invoke();
 var myIndesignDoc = app.activeDocument;
 var myUnusedSwatches = myIndesignDoc.unusedSwatches;
@@ -15,34 +23,38 @@ for (var s = myUnusedSwatches.length-1; s >= 0; s--) {
 app.activeDocument.colors.everyItem().properties = {model:ColorModel.PROCESS};
 app.activeDocument.colors.everyItem().properties = {space:ColorSpace.CMYK};
 // if color swatch is still RGB alert
-
-
+var swatchObj = mySwatches[0];
 
 var mySwatch = myIndesignDoc.swatches;  
-    var spaceCounter = 0;
-    var spaceCounterRGB = 0;
-    var spaceCounterLAB = 0;
-    var spaceCounterMIXEDINK = 0;
-    var spaceCounterGradient = 0;
+var spaceCounter = 0;
+var spaceCounterRGB = 0;
+var spaceCounterLAB = 0;
+var spaceCounterMIXEDINK = 0;
+var spaceCounterGradient = 0;
 
-    for (var j=4; j<mySwatch.length; j++){
-        
-        if(mySwatch[j].space != ColorSpace.CMYK){
-            if(mySwatch[j] instanceof Gradient){
-                spaceCounter++;
-                spaceCounterGradient++;
-            } else if (mySwatch[j].space == ColorSpace.RGB){
-                spaceCounter++;
-                spaceCounterRGB++;
+for (var j=4; j<mySwatch.length; j++){
+
+    if(mySwatch[j].hasOwnProperty('type')){
+
+        spaceCounter++;
+        spaceCounterGradient++;
+
+    } else if (mySwatch[j].hasOwnProperty('space') && mySwatch[j].space != ColorSpace.CMYK){
+
+        if (mySwatch[j].space == ColorSpace.RGB){
+            spaceCounter++;
+            spaceCounterRGB++;
+
         } else if(mySwatch[j].space == ColorSpace.LAB){
-                spaceCounter++;
-                spaceCounterLAB++;
+            spaceCounter++;
+            spaceCounterLAB++;
+
         } else if (mySwatch[j].space == ColorSpace.MIXEDINKMODEL){
-                spaceCounter++;
-                 spaceCounterMIXEDINK++;
+            spaceCounter++;
+            spaceCounterMIXEDINK++;
         }
     } 
-    }
+}
 function countUnchanged() {
     if (spaceCounter === 1){
         alert('Was unable to convert (' + spaceCounter + ') swatch to CMYK. \r' + 'Check your links for any imported spot colors. \r' + 'RGB Swatches: ' + spaceCounterRGB + '\r' + 'LAB Swatches: ' + spaceCounterRGB + '\r' + 'Gradient Swatches: ' + spaceCounterGradient + '\r' + 'Mixed-Ink Swatches: ' + spaceCounterMIXEDINK);
